@@ -1,9 +1,9 @@
-HOSTNAME=“hostname”
-USER=“user”
-PASS=“password”
-HOMEPAGE=$1
-ESTADO=$2
-MUNICIPIO=$3
+ADDRESS=$1
+NAME=$2
+HOSTNAME=$3
+USERNAME=$4
+PASSWORD=$5
+API=$6
 
 if [ -z "$HOSTNAME" ]; 
 	then echo "Usage: addhost.sh <hostname> <ip>"
@@ -16,8 +16,6 @@ fi
 
 echo IP - $IP
 
-API=http://zabbix.interlegis.leg.br/zabbix/api_jsonrpc.php
-
 jsonval() {
 prop='sessionid'
 json=`curl --noproxy zabbix.interlegis.leg.br -i -X POST -H 'Content-Type: application/json-rpc' -d "
@@ -25,8 +23,8 @@ json=`curl --noproxy zabbix.interlegis.leg.br -i -X POST -H 'Content-Type: appli
 	\"jsonrpc\": \"2.0\",
 	\"method\": \"user.login\",
 	\"params\": {
-		\"user\": \"$USER\",
-		\"password\": \"$PASS\",
+		\"user\": \"$USERNAME\",
+		\"password\": \"$PASSWORD\",
 		\"userData\":true
 	}, 
 	\"id\": 2
@@ -40,18 +38,18 @@ AUTH_TOKEN=$(jsonval)
 
 echo $AUTH_TOKEN
 echo '---------------------------------------------------'
-echo $MUNICIPIO $ESTADO $HOMEPAGE
+echo $NAME $ADDRESS
 
 json2=`curl --noproxy zabbix.interlegis.leg.br -i -X POST -H 'Content-Type: application/json-rpc' -d "
 {
 	\"jsonrpc\":\"2.0\",
 	\"method\":\"httptest.create\",
 	\"params\":{
-		\"name\":\"$MUNICIPIO - $ESTADO\",
+		\"name\":\"$NAME\",
 		\"hostid\":\"10328\",
 		\"steps\":[{
-			\"name\":\"$HOMEPAGE\",
-			\"url\":\"$HOMEPAGE\",
+			\"name\":\"$ADDRESS\",
+			\"url\":\"$ADDRESS\",
 			\"status_codes\":200,
 			\"required\":\"Acesso\",
 			\"no\":1
@@ -72,8 +70,8 @@ json3=`curl --noproxy zabbix.interlegis.leg.br -i -X POST -H 'Content-Type: appl
 	\"jsonrpc\":\"2.0\",
 	\"method\":\"trigger.create\",
 	\"params\":{
-		\"description\":\"$MUNICIPIO - $ESTADO\",
-		\"expression\":\"{PortalModelo:web.test.fail[$MUNICIPIO - $ESTADO].last(0)}=0\",
+		\"description\":\"$NAME\",
+		\"expression\":\"{PortalModelo:web.test.fail[$NAME].last(0)}=0\",
 		\"dependencies\": []
 	},
 	\"auth\":\"$AUTH_TOKEN\",
