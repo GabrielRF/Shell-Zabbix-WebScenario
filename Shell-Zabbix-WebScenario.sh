@@ -1,9 +1,11 @@
 ADDRESS=$1
-NAME=$2
-HOSTNAME=$3
-USERNAME=$4
-PASSWORD=$5
-API=$6
+STRING=$2
+NAME=$3
+HOSTID=$4
+HOSTNAME=$5
+USERNAME=$6
+PASSWORD=$7
+API=$8
 
 if [ -z "$HOSTNAME" ]; 
 	then echo "Usage: addhost.sh <hostname> <ip>"
@@ -46,12 +48,12 @@ json2=`curl --noproxy zabbix.interlegis.leg.br -i -X POST -H 'Content-Type: appl
 	\"method\":\"httptest.create\",
 	\"params\":{
 		\"name\":\"$NAME\",
-		\"hostid\":\"10328\",
+		\"hostid\":\"$HOSTID\",
 		\"steps\":[{
 			\"name\":\"$ADDRESS\",
 			\"url\":\"$ADDRESS\",
 			\"status_codes\":200,
-			\"required\":\"Acesso\",
+			\"required\":\"$STRING\",
 			\"no\":1
 		}]
 	},
