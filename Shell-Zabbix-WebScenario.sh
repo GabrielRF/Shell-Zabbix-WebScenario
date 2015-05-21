@@ -73,7 +73,7 @@ json3=`curl --noproxy zabbix.interlegis.leg.br -i -X POST -H 'Content-Type: appl
 	\"method\":\"trigger.create\",
 	\"params\":{
 		\"description\":\"$NAME\",
-		\"expression\":\"{PortalModelo:web.test.fail[$NAME].last(0)}=0\",
+		\"expression\":\"{PortalModelo:web.test.rspcode[$NAME].last(0)}<>200 and {PortalModelo:web.test.rspcode[$NAME].change(0)}=0\",
 		\"dependencies\": []
 	},
 	\"auth\":\"$AUTH_TOKEN\",
