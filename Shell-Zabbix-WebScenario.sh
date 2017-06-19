@@ -7,20 +7,21 @@ USERNAME=$6
 PASSWORD=$7
 API=$8
 
-if [ -z "$HOSTNAME" ]; 
-	then echo "Usage: addhost.sh <hostname> <ip>"
+if [ -z "$1" ];
+        then echo "Script que adiciona um cenário web e uma trigger ao Zabbix."
+        echo "Para ajuda, envie o parâmetro -h"
+        exit
+fi
+
+if [ $1 = "-h" ]; 
+	then echo "Usage: ./Shell-Zabbix-WebScenario2.sh 'Address' 'String to be found' 'Trigger and Web Scenario Name' 'Host id' 'Hostname' 'username' 'password' 'API url'"
 	exit
 fi
 
-if [ -z "$IP" ];
-	then IP=0.0.0.0
-fi
-
-echo IP - $IP
-
+# echo '---------------- User login ----------------'
 jsonval() {
 prop='sessionid'
-json=`curl --noproxy zabbix.interlegis.leg.br -i -X POST -H 'Content-Type: application/json-rpc' -d "
+json=`curl -s -i -X POST -H 'Content-Type: application/json-rpc' -d "
 {
 	\"jsonrpc\": \"2.0\",
 	\"method\": \"user.login\",
@@ -38,11 +39,9 @@ echo ${temp##*|}
 
 AUTH_TOKEN=$(jsonval)
 
-echo $AUTH_TOKEN
-echo '---------------------------------------------------'
-echo $NAME $ADDRESS
-
-json2=`curl --noproxy zabbix.interlegis.leg.br -i -X POST -H 'Content-Type: application/json-rpc' -d "
+# echo
+# echo '---------------- Http Test Create ----------------'
+json2=`curl -s -i -X POST -H 'Content-Type: application/json-rpc' -d "
 {
 	\"jsonrpc\":\"2.0\",
 	\"method\":\"httptest.create\",
@@ -62,18 +61,18 @@ json2=`curl --noproxy zabbix.interlegis.leg.br -i -X POST -H 'Content-Type: appl
 }" $API`
 
 temp3=`echo '{"jsonrpc":"2.0","result":{"httptestids":["598"]},"id":1}' | python -c 'import sys, json; obj=json.load(sys.stdin); print obj["result"]["httptestids"][0]'`
-echo "temp3:"
-echo ${temp3##*|}
+# echo ${temp3##*|}
 
 HTTPTESTIDS=$temp3
 
-json3=`curl --noproxy zabbix.interlegis.leg.br -i -X POST -H 'Content-Type: application/json-rpc' -d "
+# echo '---------------- Trigger create ----------------'
+json3=`curl -s -i -X POST -H 'Content-Type: application/json-rpc' -d "
 {
 	\"jsonrpc\":\"2.0\",
 	\"method\":\"trigger.create\",
 	\"params\":{
 		\"description\":\"$NAME\",
-		\"expression\":\"{PortalModelo:web.test.rspcode[$NAME].last(0)}<>200 and {PortalModelo:web.test.rspcode[$NAME].change(0)}=0\",
+		\"expression\":\"{$HOSTNAME:web.test.rspcode[$NAME,$ADDRESS].last(0)}<>200 and {$HOSTNAME:web.test.rspcode[$NAME,$ADDRESS].change(0)}=0\",
 		\"dependencies\": []
 	},
 	\"auth\":\"$AUTH_TOKEN\",
@@ -81,5 +80,4 @@ json3=`curl --noproxy zabbix.interlegis.leg.br -i -X POST -H 'Content-Type: appl
 }" $API`
 
 temp4=`echo $json3`
-echo '---------------------------------------------------'
 echo ${temp4##*|}
