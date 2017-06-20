@@ -8,8 +8,8 @@ PASSWORD=$7
 API=$8
 
 if [ -z "$1" ];
-        then echo "Script que adiciona um cenário web e uma trigger ao Zabbix."
-        echo "Para ajuda, envie o parâmetro -h"
+        then echo "Script to add a web scenario and a trigger to a Zabbix host."
+        echo "For help, run the script with -h"
         exit
 fi
 
