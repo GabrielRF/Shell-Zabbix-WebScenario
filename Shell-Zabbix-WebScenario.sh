@@ -72,7 +72,7 @@ json3=`curl -s -i -X POST -H 'Content-Type: application/json-rpc' -d "
 	\"method\":\"trigger.create\",
 	\"params\":{
 		\"description\":\"$NAME\",
-		\"expression\":\"{$HOSTNAME:web.test.rspcode[$NAME,$ADDRESS].last(0)}<>200 and {$HOSTNAME:web.test.rspcode[$NAME,$ADDRESS].change(0)}=0\",
+		\"expression\":\"({$HOSTNAME:web.test.rspcode[$NAME,$ADDRESS].last(0)}<>200 or {$HOSTNAME:web.test.fail[$NAME].last()}=1) and {$HOSTNAME:web.test.rspcode[$NAME,$ADDRESS].change(0)}=0\",
 		\"dependencies\": []
 	},
 	\"auth\":\"$AUTH_TOKEN\",
